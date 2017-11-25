@@ -9,13 +9,68 @@
     <script>
         const electron = require('electron');
         const {ipcRenderer} = electron;
+        const https = require('https');
+        const querystring = require('querystring');
 
         ipcRenderer.on('login:user', function(e, user){
             const {username, password} = user;
             const h1 = document.getElementById("user");
             const userText = "Current User: " + username;
             //li.appendChild(userText);
+            
+
+            // Send a POST login1 and POST login2 request to the server
+            
+            // Options for POST login1
+            const options1 = {
+                host: 'end2endchat.me',
+                port: 3000,
+                path: '/login1',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            };
+
+            // Options for POST login2
+            const options2 = {
+                host: 'end2endchat.me',
+                port: 3000,
+                path: '/login1',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }
+
+            // Body for POST login1
+            const body1 = querystring.stringify({
+                name: username
+            });
+
+
+            let req1 = https.request(options1, function(res){
+                let responseString = "";
+                res.on('data', function(chunk){
+                    let {salt, challenge} = JSON.parse(chunk);
+                    console.log(salt);
+                    // Hash the password with the salt given
+
+                    // Body for POST login2
+                    let body2 = querystring.stringify({
+
+                    })
+                    // Send POST login2 request to the server
+                    
+                });
+                res.on("end", function(){
+                    console.log("ok");
+                });
+            });
             h1.innerHTML = userText;
+
+            req1.write(body1);
+            req1.end();
         });
     </script>
 </body>
