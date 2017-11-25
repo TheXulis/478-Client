@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <form>
+        <div>
+            <label>Username</label>
+            <input type="text" id="username" autofocus>
+        </div>
+        <div>
+            <label>Password</label>
+            <input type="password" id="password">
+        </div>
+        <button type="submit">Login</button>
+    </form>
+
+    <script>
+        const electron = require('electron');
+        const {ipcRenderer} = electron;
+
+        const form = document.querySelector('form');
+        form.addEventListener('submit', submitForm);
+
+        function submitForm(e){
+            e.preventDefault();
+            const username = document.querySelector('#username').value;
+            const password = document.querySelector('#password').value;
+            const user = {'username':username, 'password':password};
+            ipcRenderer.send('login:user', user);
+        }
+    </script>
+</body>
+</html>

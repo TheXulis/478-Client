@@ -4,6 +4,19 @@
     <title>Chat</title>
 </head>
 <body>
-    <h1>Something</h1>    
+    <h1 id="user"></h1>
+
+    <script>
+        const electron = require('electron');
+        const {ipcRenderer} = electron;
+
+        ipcRenderer.on('login:user', function(e, user){
+            const {username, password} = user;
+            const h1 = document.getElementById("user");
+            const userText = "Current User: " + username;
+            //li.appendChild(userText);
+            h1.innerHTML = userText;
+        });
+    </script>
 </body>
 </html>
