@@ -11,16 +11,34 @@
         const {ipcRenderer} = electron;
         const https = require('https');
         const querystring = require('querystring');
+        const crypto = require('crypto');
 
+        // Testing user login
+        ipcRenderer.on('users', function(){
+            const options = {
+                host: 'end2endchat.me',
+                port: 3000,
+                path: '/users',
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + window.localStorage.getItem('token')                }
+            }
+
+            let req = https.request(options, function(res){
+                res.on('data', function(chunk){
+                    console.log(chunk.toString('utf8'));
+                });
+            });
+
+            req.end();
+        })
+
+        // Login user
         ipcRenderer.on('login:user', function(e, user){
             const {username, password} = user;
             const h1 = document.getElementById("user");
-            const userText = "Current User: " + username;
-            //li.appendChild(userText);
-            
+            const userText = "Current User: " + username;      
 
-            // Send a POST login1 and POST login2 request to the server
-            
             // Options for POST login1
             const options1 = {
                 host: 'end2endchat.me',
@@ -36,7 +54,7 @@
             const options2 = {
                 host: 'end2endchat.me',
                 port: 3000,
-                path: '/login1',
+                path: '/login2',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -53,24 +71,53 @@
                 let responseString = "";
                 res.on('data', function(chunk){
                     let {salt, challenge} = JSON.parse(chunk);
-                    console.log(salt);
+
                     // Hash the password with the salt given
+                    let hashedPassword = crypto.pbkdf2Sync(password, salt, 100000, 256, 'sha512');
 
                     // Body for POST login2
                     let body2 = querystring.stringify({
-
-                    })
-                    // Send POST login2 request to the server
+                        name:username,
+                        hashedPW:hashedPassword.toString('hex')
+                    });
                     
+                    // Send POST login2 request to the server
+                    let req2 = https.request(options2, function(res){
+
+                        res.on('data', function(chunk1){
+                            // Getting auth token
+                            let {token} = JSON.parse(chunk1);
+                            console.log(token);
+
+                            // Returning the token top the main file
+                            if(token != null){
+                                window.localStorage.setItem('token', token);
+                                console.log(window.localStorage['token']);
+                            }
+                            ipcRenderer.send('auth:token', token);
+                        });
+                        res.on("end", function(){
+                            console.log('Done: login2');
+                        })
+                    });
+
+                    req2.write(body2);
+                    req2.end();
                 });
                 res.on("end", function(){
-                    console.log("ok");
+                    console.log("Done: login1");
                 });
             });
+
+            
+
             h1.innerHTML = userText;
 
             req1.write(body1);
             req1.end();
+
+
+            
         });
     </script>
 </body>

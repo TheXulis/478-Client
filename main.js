@@ -55,8 +55,18 @@ function createLoginWindow(){
 
 // Catch username
 ipcMain.on('login:user', function(e, user){
-    mainWindow.webContents.send('login:user', user);
     loginWindow.close();
+    mainWindow.webContents.send('login:user', user);
+    
+});
+
+ipcMain.on('auth:token', function(e, token){
+    if(token == null){
+        createLoginWindow();
+    }
+    else{
+
+    }
 });
 
 // Create menu template
@@ -69,6 +79,12 @@ const mainMenuTemplate = [
             },
             {
                 label: 'Open Chat'
+            },
+            {
+                label: 'Get Users',
+                click(){
+                    mainWindow.webContents.send('users');
+                }
             },
             {
                 label: 'Quit',
