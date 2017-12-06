@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <title>Register as New User</title>
+</head>
+<body>
+    <form>
+        <div>
+            <label>Select UserName</label>
+            <input type ="text" id = "username">
+        </div>
+        <div>   
+            <label>Select Password</label>
+            <input type ="text" id = "password" >
+        </div>
+
+        <button type = "submit">Register!</button>
+    </form>
+
+    <script>
+            const electron = require('electron');
+            const {ipcRenderer} = electron;
+    
+            const form = document.querySelector('form');
+            form.addEventListener('submit', submitForm);
+    
+            function submitForm(e){
+                e.preventDefault();
+                const username = document.querySelector('#username').value;
+                const password = document.querySelector('#password').value;
+                const user = {'username':username, 'password':password};
+                ipcRenderer.send('register:user', user);
+            }
+        </script>
+
+   
+    
+</body>
+</html>

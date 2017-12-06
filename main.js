@@ -35,8 +35,8 @@ app.on('ready', function(){
 function createLoginWindow(){
     // Create new window
     loginWindow = new BrowserWindow({
-        width: 300,
-        height: 200,
+        width: 400,
+        height: 300,
         title: 'Enter Username'
     });
     
@@ -69,13 +69,38 @@ ipcMain.on('auth:token', function(e, token){
     }
 });
 
+// Create Registration Window
+function createRegisterWindow(){
+    //create new window
+    registerWindow = new BrowserWindow({
+        height: 400,
+        width: 300,
+        tutle:'Register as a New User'
+    });
+    // Load html into window
+    registerWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'registerWindow.html'),
+        protocol: 'file:',
+        slashes: true
+    }));
+     // Garbage collection handle
+     registerWindow.on('close', function(){
+        registerWindow = null;
+    });
+}
+
+// catch register
+
 // Create menu template
 const mainMenuTemplate = [
     {
         label: 'File',
         submenu: [
             {
-                label: 'Register'
+                label: 'Register',
+                click(){
+                    createRegisterWindow();
+                }
             },
             {
                 label: 'Open Chat'
