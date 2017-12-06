@@ -53,10 +53,17 @@ function createLoginWindow(){
     });
 }
 
-// Catch username
+// Catch log in
 ipcMain.on('login:user', function(e, user){
     loginWindow.close();
     mainWindow.webContents.send('login:user', user);
+    
+});
+
+// catch register
+ipcMain.on('register:user', function(e, user){
+    registerWindow.close();
+    
     
 });
 
@@ -89,7 +96,6 @@ function createRegisterWindow(){
     });
 }
 
-// catch register
 
 // Create menu template
 const mainMenuTemplate = [

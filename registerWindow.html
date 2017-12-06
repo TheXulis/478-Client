@@ -8,7 +8,7 @@
     <form>
         <div>
             <label>Select UserName</label>
-            <input type ="text" id = "username">
+            <input type ="text" id = "name">
         </div>
         <div>   
             <label>Select Password</label>
@@ -21,17 +21,51 @@
     <script>
             const electron = require('electron');
             const {ipcRenderer} = electron;
-    
+            const https = require("https");
+            const queryString = require("querystring");
             const form = document.querySelector('form');
             form.addEventListener('submit', submitForm);
     
             function submitForm(e){
                 e.preventDefault();
-                const username = document.querySelector('#username').value;
-                const password = document.querySelector('#password').value;
-                const user = {'username':username, 'password':password};
-                ipcRenderer.send('register:user', user);
+                const username = document.querySelector('#name').value;
+                const pw = document.querySelector('#password').value;
+                const user = {'name':name, 'password':password};
+                
+                const body = queryString.stringify({ name:username ,password:pw });
+
+                const options = {
+                host: 'end2endchat.me',
+                port: 3000,
+                path: '/register',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+                
+            };
+            
+            // send Post register
+            let req = https.request(options, function(res){
+                res.on('end', function(){
+                    //console.log("attempt");
+                })
+                res.on('data', function(chunk){
+                    let {message} = JSON.parse(chunk);
+                    if(message == "Worked"){
+                        ipcRenderer.send('register:user', user);
+                    }
+                   // console.log(chunk.toString('utf8'));
+                });
+            });
+            
+                req.write(body);
+                req.end();
+
             }
+
+            
+          
         </script>
 
    
