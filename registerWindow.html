@@ -7,12 +7,12 @@
 <body>
     <form>
         <div>
-            <label>Select UserName</label>
+            <label>Select Username</label>
             <input type ="text" id = "name">
         </div>
         <div>   
             <label>Select Password</label>
-            <input type ="text" id = "password" >
+            <input type ="password" id = "password" >
         </div>
 
         <button type = "submit">Register!</button>
@@ -53,7 +53,9 @@
                 res.on('data', function(chunk){
                     let {message} = JSON.parse(chunk);
                     if(message == "Worked"){
-                        ipcRenderer.send('register:user', user);
+                        ipcRenderer.send('register:user');
+                    } else{
+                        location.reload();
                     }
                    // console.log(chunk.toString('utf8'));
                 });
