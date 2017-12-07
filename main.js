@@ -15,7 +15,8 @@ app.on('ready', function(){
     mainWindow.loadURL(url.format({
         pathname: path.resolve('./mainWindow.html'),
         protocol: 'file',
-        slashes: true
+        slashes: true,
+        title: 'End2EndChat.me'
     }));
 
     //Quit app when closed
@@ -35,8 +36,8 @@ app.on('ready', function(){
 function createLoginWindow(){
     // Create new window
     loginWindow = new BrowserWindow({
-        width: 400,
-        height: 300,
+        width: 600,
+        height: 600,
         title: 'Enter Username'
     });
     
@@ -80,9 +81,9 @@ ipcMain.on('auth:token', function(e, token){
 function createRegisterWindow(){
     //create new window
     registerWindow = new BrowserWindow({
-        height: 400,
-        width: 300,
-        tutle:'Register as a New User'
+        height: 600,
+        width: 600,
+        title:'Register as a New User'
     });
     // Load html into window
     registerWindow.loadURL(url.format({
@@ -93,6 +94,26 @@ function createRegisterWindow(){
      // Garbage collection handle
      registerWindow.on('close', function(){
         registerWindow = null;
+    });
+}
+
+// Create Chat Window
+function createChatWindow(){
+    //create new window
+    chatWindow = new BrowserWindow({
+        height: 600,
+        width: 600,
+        title:'Chat Window'
+    });
+    // Load html into window
+    chatWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'chatWindow.html'),
+        protocol: 'file:',
+        slashes: true
+    }));
+     // Garbage collection handle
+     chatWindow.on('close', function(){
+        chatWindow = null;
     });
 }
 
@@ -109,7 +130,10 @@ const mainMenuTemplate = [
                 }
             },
             {
-                label: 'Open Chat'
+                label: 'Open Chat',
+                click(){
+                    createChatWindow();
+                }
             },
             {
                 label: 'Get Users',
