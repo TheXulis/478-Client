@@ -13,6 +13,8 @@
         const querystring = require('querystring');
         const crypto = require('crypto');
 
+        const h1 = document.getElementById("user");
+
         // Testing user login
         ipcRenderer.on('users', function(){
             const options = {
@@ -35,9 +37,7 @@
 
         // Login user
         ipcRenderer.on('login:user', function(e, user){
-            const {username, password} = user;
-            const h1 = document.getElementById("user");
-            const userText = "Current User: " + username;      
+            const {username, password} = user;     
 
             // Options for POST login1
             const options1 = {
@@ -70,39 +70,49 @@
             let req1 = https.request(options1, function(res){
                 let responseString = "";
                 res.on('data', function(chunk){
-                    let {salt, challenge} = JSON.parse(chunk);
+                    let {message, salt, challenge, error1} = JSON.parse(chunk);
 
-                    // Hash the password with the salt given
-                    let hashedPassword = crypto.pbkdf2Sync(password, salt, 100000, 256, 'sha512');
+                    if(message == "Worked"){
 
-                    // Body for POST login2
-                    let body2 = querystring.stringify({
-                        name:username,
-                        hashedPW:hashedPassword.toString('hex')
-                    });
-                    
-                    // Send POST login2 request to the server
-                    let req2 = https.request(options2, function(res){
+                        // Hash the password with the salt given
+                        let hashedPassword = crypto.pbkdf2Sync(password, salt, 100000, 256, 'sha512');
 
-                        res.on('data', function(chunk1){
-                            // Getting auth token
-                            let {token} = JSON.parse(chunk1);
-                            console.log(token);
-
-                            // Returning the token top the main file
-                            if(token != null){
-                                window.localStorage.setItem('token', token);
-                                console.log(window.localStorage['token']);
-                            }
-                            ipcRenderer.send('auth:token', token);
+                        // Body for POST login2
+                        let body2 = querystring.stringify({
+                            name:username,
+                            hashedPW:hashedPassword.toString('hex')
                         });
-                        res.on("end", function(){
-                            console.log('Done: login2');
-                        })
-                    });
+                        
+                        // Send POST login2 request to the server
+                        let req2 = https.request(options2, function(res){
 
-                    req2.write(body2);
-                    req2.end();
+                            res.on('data', function(chunk1){
+                                // Getting auth token
+                                let {message, error2, token} = JSON.parse(chunk1);
+                                console.log(token);
+
+                                // Returning the token top the main file
+                                if(message == "Worked"){
+                                    window.localStorage.setItem('token', token);
+                                    console.log(window.localStorage['token']);
+                                    h1.innerHTML = "Current User: " + username;
+                                    ipcRenderer.send('auth:token', token);
+                                } else{
+                                    h1.innerHTML = error2;
+                                }
+                                
+                            });
+                            res.on("end", function(){
+                                console.log('Done: login2');
+                            })
+                        });
+
+                        req2.write(body2);
+                        req2.end();
+                    }
+                    else{
+                        h1.innerHTML = error1;
+                    }
                 });
                 res.on("end", function(){
                     console.log("Done: login1");
@@ -110,8 +120,6 @@
             });
 
             
-
-            h1.innerHTML = userText;
 
             req1.write(body1);
             req1.end();
