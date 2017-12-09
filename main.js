@@ -63,8 +63,7 @@ ipcMain.on('login:user', function(e, user){
 
 // catch register
 ipcMain.on('register:user', function(e, user){
-    registerWindow.close();
-    
+    //registerWindow.close();
     
 });
 

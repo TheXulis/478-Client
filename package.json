@@ -9,6 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "electron": "^1.7.9"
+    "electron": "^1.7.9",
+    "jsonwebtoken": "^8.1.0",
+    "python-shell": "^0.4.0",
+    "ws": "^3.3.2"
   }
 }

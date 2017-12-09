@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
@@ -31,5 +31,86 @@ $(document).ready(function(){
  
 });
 </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat</title>
+    <link type="text/css" rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div id="wrapper">
+        <div id="menu">
+            
+            <div style="clear:both"></div>
+        </div>
+
+        <div id="chatbox">
+
+        </div>
+
+        <form name="message" action="">
+            <input name="usermsg" type="text" id="usermsg" size="63" />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+            const electron = require('electron');
+            const Socket = require('ws');
+            const jwt = require('jsonwebtoken');
+            const querystring = require('querystring');
+            const ws = new Socket('https://end2endchat.me/',{
+                headers:{
+                    Authorization: window.localStorage.getItem('token')
+                }
+            });
+
+            let decoded = jwt.decode(window.localStorage.getItem('token'), {complete:true});
+            let initData = JSON.stringify({
+                type:"initial",
+                sender: decoded.payload.username,
+                receiver:"Bob"
+            });
+
+            let messageData =  JSON.stringify({
+                type: "message"
+            });
+
+            ws.on('open', function open() {
+                console.log('connected');
+                ws.send(initData);
+                ws.send(messageData);
+            });
+
+            ws.on('close', function close() {
+                console.log('diconnected');
+            })
+
+            ws.on('message', function incoming(data) {
+                console.log('message received');
+                console.log(data);
+            });
+        
+
+
+            ws.on('error', function(err){
+                console.log('Unauthorized token');
+            });
+    
+            // const form = document.querySelector('form');
+            // form.addEventListener('submit', submitForm);
+
+            // let userChat = document.getElementById('chatbox');
+    
+            // function submitForm(e){
+            //     e.preventDefault();
+            //     const msg = document.querySelector('#usermsg').value;
+            //     userChat.innerHTML += "<p>"+msg+ "</p>"
+            // }
+    </script>
 </body>
 </html>

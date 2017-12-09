@@ -30,7 +30,7 @@ function encryption(plaintext){
     let hmacTag = hmac.digest('hex');
 
     //Get RSA Key
-    let absoluteKeyPath = path.resolve('../keys/rsa_public_key.pem');
+    let absoluteKeyPath = path.resolve('../keys/publicChatKey.pem');
     let rsaPublicKey = fs.readFileSync(absoluteKeyPath, 'utf8');
     let rsaBufferKey = new Buffer(rsaPublicKey, 'binary');
 
@@ -57,7 +57,7 @@ function decrypt(json) {
     let hmacTag = json.hmacTag;
 
     //Get RSA Key
-    let absoluteKeyPath = path.resolve('../keys/rsa_private_key.pem');
+    let absoluteKeyPath = path.resolve('../keys/privateChatKey.pem');
     let rsaPrivateKey = fs.readFileSync(absoluteKeyPath, 'utf8');
     let rsaBufferKey = new Buffer(rsaPrivateKey, 'binary');
 
