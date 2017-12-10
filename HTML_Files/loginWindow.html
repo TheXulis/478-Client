@@ -33,6 +33,15 @@
         const form = document.querySelector('form');
         form.addEventListener('submit', submitForm);
 
+        let token = window.localStorage.getItem('token')
+        if(token){
+            //Verify token
+            console.log("Verifying token");
+
+        } else {
+            console.log("No token found");
+        }
+
         function submitForm(e){
             e.preventDefault();
             const username = document.querySelector('#username').value;

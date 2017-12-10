@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat Request</title>
+</head>
+<body>
+    <form >
+        <div id="userRequest"> </div>
+    
+    
+
+        <div>
+                <input id="yesBtn" type="button" value="Yes" onclick="selectYes();"/>
+                <input id="noBtn" type="button" value="No" onclick="selectNo();"/>            
+        </div>
+
+    </form>
+
+    <script>
+        const electron = require('electron');
+        const {ipcRenderer} = electron;
+        const currentWindow = electron.remote.getCurrentWindow();
+
+        function selectYes(){
+            console.log("Yes button was pressed.");
+        }
+
+        function selectNo(){
+            console.log("No button was pressed.");
+        }
+
+        console.log(currentWindow.custom.otherUser);
+        let prompt = document.getElementById('userRequest');
+        prompt.innerHTML = currentWindow.custom + " wishes to open a chat with you.";
+    </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+</head>
+<body>
+    <form>
+        <div>
+            <label>Who would you like to chat with?</label>
+        </div>
+        <div>
+            <input type="text" id="otherUser" autofocus>
+        </div>
+        <button type="submit">Request Chat</button>
+    </form>
+    <script>
+        const electron = require('electron');
+        const {ipcRenderer} = electron;
+
+        const form = document.querySelector('form');
+        form.addEventListener('submit', submitForm);
+
+        if(window.localStorage.getItem('token')){
+            console.log("Fine");
+        } else {
+            this.close();
+        }
+
+        function submitForm(e){
+            e.preventDefault();
+            const otherUser = document.querySelector('#otherUser').value;
+            const user = {'sender':otherUser};
+            ipcRenderer.send('request:other', otherUser);
+        }
+
+    </script>
+</body>
+</html>

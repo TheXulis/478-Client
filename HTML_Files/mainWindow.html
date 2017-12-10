@@ -20,28 +20,11 @@
         const https = require('https');
         const querystring = require('querystring');
         const crypto = require('crypto');
+        const Socket = require('ws');
+        const jwt = require('jsonwebtoken');
 
         const h1 = document.getElementById("user");
-
-        // Testing user login
-        ipcRenderer.on('users', function(){
-            const options = {
-                host: 'end2endchat.me',
-                port: 3000,
-                path: '/users',
-                method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + window.localStorage.getItem('token')                }
-            }
-
-            let req = https.request(options, function(res){
-                res.on('data', function(chunk){
-                    console.log(chunk.toString('utf8'));
-                });
-            });
-
-            req.end();
-        })
+        let login = false;
 
         // Login user
         ipcRenderer.on('login:user', function(e, user){
@@ -104,7 +87,43 @@
                                     window.localStorage.setItem('token', token);
                                     console.log(window.localStorage['token']);
                                     h1.innerHTML = "Current User: " + username;
-                                    ipcRenderer.send('auth:token', token);
+                                    login = true;
+
+                                    const ws = new Socket('https://end2endchat.me/',{
+                    headers:{
+                        Authorization: window.localStorage.getItem('token')
+                    }
+                });
+
+                let decoded = jwt.decode(window.localStorage.getItem('token'), {complete:true});
+                let initData = JSON.stringify({
+                    type:"initializeUser",
+                    user: decoded.payload.username
+                });
+
+                let messageData =  JSON.stringify({
+                    type: "message"
+                });
+
+                ws.on('open', function open() {
+                    console.log('connected');
+                    ws.send(initData);
+                });
+
+                ws.on('close', function close() {
+                    console.log('diconnected');
+                })
+
+                ws.on('message', function incoming(data) {
+                    console.log('message received');
+                    console.log(data);
+                });
+            
+                ws.on('error', function(err){
+                    console.log('Unauthorized token');
+                });
+
+                
                                 } else{
                                     h1.innerHTML = error2;
                                 }
@@ -132,9 +151,14 @@
             req1.write(body1);
             req1.end();
 
-
+            console.log(login);
+            if(login){
+                
+            }
             
         });
+
+        //Send request to other user
     </script>
 </body>
 </html>

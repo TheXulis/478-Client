@@ -5,6 +5,7 @@ const https = require('https');
 
 const {app, BrowserWindow, Menu, ipcMain} = electron;
 let mainWindow;
+let currentUser;
 
 // Listen for the app to be ready
 app.on('ready', function(){
@@ -13,7 +14,7 @@ app.on('ready', function(){
     
     // Load html into window
     mainWindow.loadURL(url.format({
-        pathname: path.resolve('./mainWindow.html'),
+        pathname: path.resolve('HTML_Files/mainWindow.html'),
         protocol: 'file',
         slashes: true,
         title: 'End2EndChat.me'
@@ -43,7 +44,7 @@ function createLoginWindow(){
     
     // Load html into window
     loginWindow.loadURL(url.format({
-        pathname: path.resolve('./loginWindow.html'),
+        pathname: path.resolve('HTML_Files/loginWindow.html'),
         protocol: 'file',
         slashes: true
     }));
@@ -53,28 +54,6 @@ function createLoginWindow(){
         addWindow = null;
     });
 }
-
-// Catch log in
-ipcMain.on('login:user', function(e, user){
-    loginWindow.close();
-    mainWindow.webContents.send('login:user', user);
-    
-});
-
-// catch register
-ipcMain.on('register:user', function(e, user){
-    //registerWindow.close();
-    
-});
-
-ipcMain.on('auth:token', function(e, token){
-    if(token == null){
-        createLoginWindow();
-    }
-    else{
-
-    }
-});
 
 // Create Registration Window
 function createRegisterWindow(){
@@ -86,7 +65,7 @@ function createRegisterWindow(){
     });
     // Load html into window
     registerWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'registerWindow.html'),
+        pathname: path.join(__dirname, 'HTML_Files/registerWindow.html'),
         protocol: 'file:',
         slashes: true
     }));
@@ -106,7 +85,7 @@ function createChatWindow(){
     });
     // Load html into window
     chatWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'chatWindow.html'),
+        pathname: path.join(__dirname, 'HTML_Files/chatWindow.html'),
         protocol: 'file:',
         slashes: true
     }));
@@ -116,6 +95,70 @@ function createChatWindow(){
     });
 }
 
+// Create Chat Request Window
+function createRequestWindow(){
+    //create new window
+    requestWindow = new BrowserWindow({
+        height: 200,
+        width: 400,
+        title:'Chat Window'
+    });
+    // Load html into window
+    requestWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'HTML_Files/requestChat.html'),
+        protocol: 'file:',
+        slashes: true
+    }));
+     // Garbage collection handle
+     requestWindow.on('close', function(){
+        requestWindow = null;
+    });
+}
+
+// Create Request Pop up Window for when a user receives a chat request.
+function createPopUpWindow(other){
+    //create new window
+    popUpWindow = new BrowserWindow({
+        height: 150,
+        width: 400,
+        title:'Chat Window',
+        skipTaskbar: true
+    });
+    // Load html into window
+    popUpWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'HTML_Files/popUp.html'),
+        protocol: 'file:',
+        slashes: true
+    }));
+     // Garbage collection handle
+     popUpWindow.on('close', function(){
+        popUpWindow = null;
+    });
+
+    popUpWindow.requester = other;
+
+}
+
+// Catch log in
+ipcMain.on('login:user', function(e, user){
+    loginWindow.close();
+    mainWindow.webContents.send('login:user', user); 
+    currentUser = user.username;
+});
+
+// catch register
+ipcMain.on('register:user', function(e){
+    registerWindow.close();
+});
+
+// catch request chat
+ipcMain.on('request:other', function(e, other){
+    requestWindow.close();
+    createPopUpWindow(currentUser);
+
+    // createChatWindow();
+    // chatWindow.webContents.send('request:other', other);
+});
 
 // Create menu template
 const mainMenuTemplate = [
@@ -129,9 +172,11 @@ const mainMenuTemplate = [
                 }
             },
             {
-                label: 'Open Chat',
+                label: 'Request Chat',
+                accelerator: process.platform == 'darwin' ? 'Command+Alt+C' :
+                'Ctrl+Alt+C',
                 click(){
-                    createChatWindow();
+                    createRequestWindow();
                 }
             },
             {
@@ -172,6 +217,14 @@ if(process.env.Node_ENV != 'production'){
             },
             {
                 role:'reload'
+            },
+            {
+                label: 'Clear Local Storage',
+                accelerator: process.platform == 'darwin' ? 'Command+Alt+I' :
+                'Ctrl+Alt+I',
+                click(){
+                    mainWindow.webContents.session.clearStorageData();
+                }
             }
         ]
     });

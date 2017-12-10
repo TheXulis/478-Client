@@ -39,7 +39,7 @@ $(document).ready(function(){
 <html lang="en">
 <head>
     <title>Chat</title>
-    <link type="text/css" rel="stylesheet" href="style.css" />
+    <link type="text/css" rel="stylesheet" href="../CSS_Files/style.css" />
 </head>
 <body>
     <div id="wrapper">
@@ -62,18 +62,20 @@ $(document).ready(function(){
             const electron = require('electron');
             const Socket = require('ws');
             const jwt = require('jsonwebtoken');
-            const querystring = require('querystring');
             const ws = new Socket('https://end2endchat.me/',{
                 headers:{
                     Authorization: window.localStorage.getItem('token')
                 }
             });
 
+            // ipcRenderer.on('request:other', function(e, user){
+
+            // });
+
             let decoded = jwt.decode(window.localStorage.getItem('token'), {complete:true});
             let initData = JSON.stringify({
-                type:"initial",
-                sender: decoded.payload.username,
-                receiver:"Bob"
+                type:"initializeUser",
+                user: decoded.payload.username
             });
 
             let messageData =  JSON.stringify({
@@ -83,7 +85,6 @@ $(document).ready(function(){
             ws.on('open', function open() {
                 console.log('connected');
                 ws.send(initData);
-                ws.send(messageData);
             });
 
             ws.on('close', function close() {
@@ -95,8 +96,6 @@ $(document).ready(function(){
                 console.log(data);
             });
         
-
-
             ws.on('error', function(err){
                 console.log('Unauthorized token');
             });
