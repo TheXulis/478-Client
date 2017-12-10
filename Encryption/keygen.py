@@ -9,10 +9,10 @@ privkey = private.exportKey()
 pubkey = public.exportKey()
 
 
-privFile = open("../keys/privateChatKey.pem", "w+")
+privFile = open("./keys/privateChatKey.pem", "w+")
 privFile.write(privkey.decode("utf-8", "strict"))
 
-pubFile = open("../keys/publicChatKey.pem", "w+")
+pubFile = open("./keys/publicChatKey.pem", "w+")
 pubFile.write(pubkey.decode("utf-8", "strict"))
 
 print(pubkey.decode("utf-8", "strict"))
