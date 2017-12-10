@@ -1,0 +1,1 @@
+Keys for encrypted chats are stored here.
