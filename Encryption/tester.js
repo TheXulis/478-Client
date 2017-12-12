@@ -1,11 +1,18 @@
-// const crypto = require('./encryption');
+const crypto = require('./encryption');
+const path = require('path');
+const fs = require('fs');
 
-// let json = crypto.encryption("A Message");
+let absoluteKeyPath = path.resolve('./keys/BobPublicKey.pem');
+let rsaPublicKey = fs.readFileSync(absoluteKeyPath, 'utf8');
+
+let json = crypto.encrypt("A Message", rsaPublicKey);
     
-// let plaintext = crypto.decrypt(json);
-// console.log(plaintext);
+let plaintext = crypto.decrypt(json);
+console.log(plaintext);
 
-let users = {};
-user = "user";
-users[user] = "else";
-console.log(users[user]);
+// const path = require('path');
+// const fs = require('fs');
+
+// let absoluteKeyPath = path.resolve('./keys/publicChatKey.pem');
+// let rsaPublicKey = fs.readFileSync(absoluteKeyPath, 'utf8');
+// console.log(rsaPublicKey);

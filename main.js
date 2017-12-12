@@ -85,8 +85,8 @@ function createRegisterWindow(){
 function createChatWindow(data){
     //create new window
     chatWindow = new BrowserWindow({
-        height: 600,
-        width: 600,
+        height: 800,
+        width: 700,
         title:'Chat Window'
     });
     // Load html into window

@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-function encryption(plaintext){
+function encrypt(plaintext, rsaPublicKey){
     let AES_IV = crypto.randomBytes(16);
 
     //AES key generation
@@ -30,12 +30,12 @@ function encryption(plaintext){
     let hmacTag = hmac.digest('hex');
 
     //Get RSA Key
-    let absoluteKeyPath = path.resolve('./keys/publicChatKey.pem');
-    let rsaPublicKey = fs.readFileSync(absoluteKeyPath, 'utf8');
+    // let absoluteKeyPath = path.resolve('./keys/publicChatKey.pem');
+    // let rsaPublicKey = fs.readFileSync(absoluteKeyPath, 'utf8');
     let rsaBufferKey = new Buffer(rsaPublicKey, 'binary');
 
     //RSA Key Encryption
-    let rsaOptions = {key:rsaPublicKey, padding:crypto.constants.RSA_PKCS1_OAEP_PADDING};
+    let rsaOptions = {key:rsaBufferKey, padding:crypto.constants.RSA_PKCS1_OAEP_PADDING};
     let rsaBuffer = Buffer.concat([hmacBuffer, aesBuffer]);
     let rsaCiphertext = crypto.publicEncrypt(rsaOptions, rsaBuffer);
 
@@ -92,4 +92,4 @@ function decrypt(json) {
     return plaintext;
 }
 
-module.exports = {decrypt, encryption};
+module.exports = {decrypt, encrypt};

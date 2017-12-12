@@ -58,23 +58,39 @@ $(document).ready(function(){
         </form>
     </div>
 
+    <div>
+        <form>
+            <div>
+                <textarea name="publickey" id="publickey" cols="65" rows="10"></textarea>
+            </div>
+            <div>
+                <input id="UpdateKey" type="button" value = "Update Key" onclick="updateKey();"/>
+            </div>
+        </form>
+    </div>
+
     <script>
             const electron = require('electron');
             const Socket = require('ws');
             const jwt = require('jsonwebtoken');
             const currentWindow = electron.remote.getCurrentWindow();
+            const customCrypto = require('../Encryption/encryption');
+            const path = require('path');
+            const fs = require('fs');
             const ws = new Socket('https://end2endchat.me/',{
                 headers:{
                     Authorization: window.localStorage.getItem('token')
                 }
             });
+            
 
-            // ipcRenderer.on('request:other', function(e, user){
-
-            // });
+            //Define the public key path for this chat
+            let p = './keys/' + currentWindow.other + 'PublicKey.pem';
+            let keypath = path.resolve(p);
 
             let decoded = jwt.decode(window.localStorage.getItem('token'), {complete:true});
             let initData;
+            let publickey;
             //Check to see if this is the first chat to open
             if(currentWindow.order === "first"){
                 initData = JSON.stringify({
@@ -108,8 +124,9 @@ $(document).ready(function(){
 
                 console.log(data);
                 let object = JSON.parse(data);
+                console.log(object.message);
 
-                userChat.innerHTML += "<p>" + currentWindow.other + ": " + object.message + "</p>"
+                userChat.innerHTML += "<p>" + currentWindow.other + ": " + decrypt(object.message) + "</p>"
             });
         
             ws.on('error', function(err){
@@ -125,13 +142,34 @@ $(document).ready(function(){
                 e.preventDefault();
                 const msg = document.querySelector('#usermsg').value;
                 userChat.innerHTML += "<p>" + decoded.payload.username + ": " + msg + "</p>"
+                
+                
+                publickey = fs.readFileSync(keypath, 'utf8');
+                
+                //Read the public key
+                console.log(String(publickey));
+                console.log(msg)
+                let encryptedMessage = customCrypto.encrypt(msg, String(publickey));
+                let encryptedMessageString = JSON.stringify(encryptedMessage);
 
                 let mssg = JSON.stringify({
                     type: "message",
-                    message: msg
+                    message: encryptedMessage
                 });
 
+                console.log(mssg);
                 ws.send(mssg);
+            }
+
+            function updateKey(){
+                const pk = document.getElementById("publickey").value;
+                console.log(pk);
+
+
+                fs.writeFile(keypath, pk, function(){
+                    console.log("writing");
+                });
+                
             }
     </script>
 </body>
