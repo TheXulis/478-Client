@@ -58,8 +58,7 @@
             console.log(data);
             let object = JSON.parse(data);
 
-            if(object.type === "requestChat"){
-
+            if(object.type == "requestingChat"){
                 ipcRenderer.send('notification:chat', object.from);
             }
 

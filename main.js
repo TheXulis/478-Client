@@ -166,6 +166,7 @@ ipcMain.on('request:other', function(e, other){
 
 // catch nootification for chat
 ipcMain.on('notification:chat', function(e, other){
+    console.log(other);
     createChatNotificationWindow(other);
 });
 
