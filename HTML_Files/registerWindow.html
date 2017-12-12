@@ -29,6 +29,11 @@
         </div>
 
         <button type = "submit">Register!</button>
+        <div>
+            <font color="red">
+                <p  id = "error"></p>
+            </font>
+        </div>
     </form>
 
     <script>
@@ -40,6 +45,8 @@
             const path = require('path');
             const form = document.querySelector('form');
             form.addEventListener('submit', submitForm);
+
+            const p = document.getElementById("error");
     
             function submitForm(e){
                 e.preventDefault();
@@ -70,46 +77,11 @@
                 res.on('data', function(chunk){
                     let {message} = JSON.parse(chunk);
                     if(message == "Worked"){
-                        const PythonShell = require('python-shell');
-
-                        PythonShell.run('Encryption/keygen.py', function(err, results){
-                            
-                            let absoluteKeyPath = path.resolve('../keys/publicChatKey.pem');
-                            let pubKey = fs.readFileSync(absoluteKeyPath, 'utf8');
-                            console.log(pubKey);
-
-                            const options2 = {
-                                host: 'end2endchat.me',
-                                port: 3000,
-                                path: '/pubKey',
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded'
-                                }
-                            };
-
-                            let req2 = https.request(options2, function(res){
-                                res.on('end', function(){
-                                    console.log("pubKey end");
-                                });
-
-                                res.on('data', function(chunk1){
-                                    let {user} = JSON.parse(chunk1);
-                                    console.log(user);
-                                });
-                            });
-
-                            const body2 = queryString.stringify({ name:username , publickey:pubKey});
-
-                            req2.write(body2);
-                            req2.end();
-
-                            ipcRenderer.send('register:user');
-                        });
+                        ipcRenderer.send('register:user');
 
                         
                     } else{
-                        location.reload();
+                        p.innerHTML = "User already exists.";
                     }
                    // console.log(chunk.toString('utf8'));
                 });
