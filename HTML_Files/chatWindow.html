@@ -126,7 +126,7 @@ $(document).ready(function(){
                 let object = JSON.parse(data);
                 console.log(object.message);
 
-                userChat.innerHTML += "<p>" + currentWindow.other + ": " + decrypt(object.message) + "</p>"
+                userChat.innerHTML += "<p>" + currentWindow.other + ": " + customCrypto.decrypt(object.message) + "</p>"
             });
         
             ws.on('error', function(err){

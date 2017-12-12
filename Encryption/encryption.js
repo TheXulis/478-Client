@@ -13,6 +13,7 @@ function encrypt(plaintext, rsaPublicKey){
 
     //AES encryption
     let aesBuffer = new Buffer(AESkey, 'binary');
+    console.log(aesBuffer);
     let AEScipher = crypto.createCipheriv('aes-256-cbc', aesBuffer, AES_IV);
     let aesCiphertext = AEScipher.update(plaintext);
     aesCiphertext = Buffer.concat([aesCiphertext, AEScipher.final()]);
@@ -44,7 +45,6 @@ function encrypt(plaintext, rsaPublicKey){
                 "AES_IV": AES_IV,
                 "hmacTag": hmacTag};
 
-    console.log(output);
     return output;
 }
 
@@ -63,6 +63,7 @@ function decrypt(json) {
 
     //Decrypt RSA
     let options = {key:rsaBufferKey, padding:crypto.constants.RSA_PKCS1_OEAP_PADDING};
+    rsaCiphertext = Buffer(rsaCiphertext);
     let rsaPlaintext = crypto.privateDecrypt(options, rsaCiphertext);
     let keyLength = Buffer.byteLength(rsaPlaintext, 'hex')/2;
 
@@ -76,10 +77,12 @@ function decrypt(json) {
 
     //HMAC tag verification
     let hmac = crypto.createHmac('sha256', hmacKey);
+    aesCiphertext = Buffer(aesCiphertext);
     hmac.update(aesCiphertext);
     let hmacTag2 = hmac.digest('hex');
     if(hmacTag2==(hmacTag2)){
         //AES decryption
+        AES_IV = Buffer(AES_IV);
         let decipher = crypto.createDecipheriv('aes-256-cbc', aesKey, AES_IV);
         let aesPlaintext = decipher.update(aesCiphertext);
         aesPlaintext = Buffer.concat([aesPlaintext, decipher.final()]);
