@@ -82,7 +82,7 @@ function createRegisterWindow(){
 }
 
 // Create Chat Window
-function createChatWindow(){
+function createChatWindow(data){
     //create new window
     chatWindow = new BrowserWindow({
         height: 600,
@@ -99,6 +99,9 @@ function createChatWindow(){
      chatWindow.on('close', function(){
         chatWindow = null;
     });
+
+    chatWindow.other = data.other;
+    chatWindow.order = data.order;
 }
 
 // Create Chat Request Window
@@ -159,15 +162,30 @@ ipcMain.on('register:user', function(e){
 // catch request chat
 ipcMain.on('request:other', function(e, other){
     requestWindow.close();
-    //createPopUpWindow(currentUser);
 
     mainWindow.webContents.send('request:other', other);
 });
 
 // catch nootification for chat
 ipcMain.on('notification:chat', function(e, other){
-    console.log(other);
     createChatNotificationWindow(other);
+});
+
+// catch chat accept
+ipcMain.on('chat:accepted', function(e, data){
+    chatNotificationWindow.close();
+
+    createChatWindow(data);
+});
+
+// catch chat decline
+ipcMain.on('chat:declined', function(e){
+    chatNotificationWindow.close();
+});
+
+// catch open second chat
+ipcMain.on('chat:acceptedSecond', function(e, data){
+    createChatWindow(data);
 });
 
 // Create menu template

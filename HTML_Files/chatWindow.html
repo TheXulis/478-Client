@@ -62,6 +62,7 @@ $(document).ready(function(){
             const electron = require('electron');
             const Socket = require('ws');
             const jwt = require('jsonwebtoken');
+            const currentWindow = electron.remote.getCurrentWindow();
             const ws = new Socket('https://end2endchat.me/',{
                 headers:{
                     Authorization: window.localStorage.getItem('token')
@@ -73,10 +74,22 @@ $(document).ready(function(){
             // });
 
             let decoded = jwt.decode(window.localStorage.getItem('token'), {complete:true});
-            let initData = JSON.stringify({
-                type:"initializeUser",
-                user: decoded.payload.username
-            });
+            let initData;
+            //Check to see if this is the first chat to open
+            if(currentWindow.order === "first"){
+                initData = JSON.stringify({
+                    type:"initializeChatFirst",
+                    user: decoded.payload.username,
+                    other: currentWindow.other
+                });
+            }else if(currentWindow.order === "second"){
+                initData = JSON.stringify({
+                    type:"initializeChatSecond",
+                    user: decoded.payload.username,
+                    other: currentWindow.other
+                });
+            }
+            
 
             let messageData =  JSON.stringify({
                 type: "message"

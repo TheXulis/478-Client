@@ -58,8 +58,12 @@
             console.log(data);
             let object = JSON.parse(data);
 
-            if(object.type == "requestingChat"){
+            if(object.type === "requestingChat"){
                 ipcRenderer.send('notification:chat', object.from);
+            } else if(object.type === "chat:acceptedSecond"){
+                let info = {other: object.other, order: "second"}
+                console.log("Opening second chat.");
+                ipcRenderer.send('chat:acceptedSecond', info)
             }
 
         });

@@ -6,8 +6,6 @@
 <body>
     <form >
         <div id="userRequest"> </div>
-    
-    
 
         <div>
                 <input id="yesBtn" type="button" value="Accept" onclick="selectYes();"/>
@@ -22,11 +20,12 @@
         const currentWindow = electron.remote.getCurrentWindow();
 
         function selectYes(){
-            console.log("Yes button was pressed.");
+            let data = {other: currentWindow.requester, order: "first"}
+            ipcRenderer.send("chat:accepted", data);
         }
 
         function selectNo(){
-            console.log("No button was pressed.");
+            ipcRenderer.send("chat:declined");
         }
 
         console.log(currentWindow.requester);
