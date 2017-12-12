@@ -109,7 +109,7 @@ $(document).ready(function(){
                 console.log(data);
                 let object = JSON.parse(data);
 
-                userChat.innerHTML += "<p>" + currentWindow.other + ": " + data.message + "</p>"
+                userChat.innerHTML += "<p>" + currentWindow.other + ": " + object.message + "</p>"
             });
         
             ws.on('error', function(err){
@@ -127,7 +127,7 @@ $(document).ready(function(){
                 userChat.innerHTML += "<p>" + decoded.payload.username + ": " + msg + "</p>"
 
                 let mssg = JSON.stringify({
-                    type: "messsage",
+                    type: "message",
                     message: msg
                 });
 
