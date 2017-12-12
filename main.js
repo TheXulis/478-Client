@@ -122,26 +122,26 @@ function createRequestWindow(){
 }
 
 // Create Request Pop up Window for when a user receives a chat request.
-function createPopUpWindow(other){
+function createChatNotificationWindow(other){
     //create new window
-    popUpWindow = new BrowserWindow({
+    chatNotificationWindow = new BrowserWindow({
         height: 150,
         width: 400,
         title:'Chat Window',
         skipTaskbar: true
     });
     // Load html into window
-    popUpWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'HTML_Files/popUp.html'),
+    chatNotificationWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'HTML_Files/chatNotification.html'),
         protocol: 'file:',
         slashes: true
     }));
      // Garbage collection handle
-     popUpWindow.on('close', function(){
-        popUpWindow = null;
+     chatNotificationWindow.on('close', function(){
+        chatNotificationWindow = null;
     });
 
-    popUpWindow.requester = other;
+    chatNotificationWindow.requester = other;
 
 }
 
@@ -162,6 +162,11 @@ ipcMain.on('request:other', function(e, other){
     //createPopUpWindow(currentUser);
 
     mainWindow.webContents.send('request:other', other);
+});
+
+// catch nootification for chat
+ipcMain.on('notification:chat', function(e, other){
+    createChatNotificationWindow(other);
 });
 
 // Create menu template

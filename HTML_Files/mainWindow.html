@@ -54,8 +54,15 @@
         })
 
         ws.on('message', function incoming(data) {
-            console.log('message received');
+            
             console.log(data);
+            let object = JSON.parse(data);
+
+            if(object.type === "requestChat"){
+
+                ipcRenderer.send('notification:chat', object.from);
+            }
+
         });
     
         ws.on('error', function(err){
@@ -75,10 +82,10 @@
         //Send request to other user
         ipcRenderer.on('request:other', function(e, other){
             let socketMessage = JSON.stringify({
-                type:"initializeChat",
-                receiver:other.sender
+                type:"requestChat",
+                receiver:other
             });
-
+            
             ws.send(socketMessage)
         });
     </script>
