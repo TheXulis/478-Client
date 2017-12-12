@@ -9,28 +9,15 @@ let currentUser;
 
 // Listen for the app to be ready
 app.on('ready', function(){
-    // Create new window
-    mainWindow = new BrowserWindow({});
-    
-    // Load html into window
-    mainWindow.loadURL(url.format({
-        pathname: path.resolve('HTML_Files/mainWindow.html'),
-        protocol: 'file',
-        slashes: true,
-        title: 'End2EndChat.me'
-    }));
 
-    //Quit app when closed
-    mainWindow.on('closed', function(){
-        app.quit();
-    });
+    createLoginWindow();
 
     // Build menu from remplate
     const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
     // Insert menu
     Menu.setApplicationMenu(mainMenu);
 
-    createLoginWindow();
+    
 });
 
 // Handle login window
@@ -52,6 +39,25 @@ function createLoginWindow(){
     // Garbage collection handle
     loginWindow.on('close', function(){
         addWindow = null;
+    });
+}
+
+// Handle main window
+function createMainWindow(){
+    // Create new window
+    mainWindow = new BrowserWindow({});
+    
+    // Load html into window
+    mainWindow.loadURL(url.format({
+        pathname: path.resolve('HTML_Files/mainWindow.html'),
+        protocol: 'file',
+        slashes: true,
+        title: 'End2EndChat.me'
+    }));
+
+    //Quit app when closed
+    mainWindow.on('closed', function(){
+        app.quit();
     });
 }
 
@@ -140,10 +146,9 @@ function createPopUpWindow(other){
 }
 
 // Catch log in
-ipcMain.on('login:user', function(e, user){
+ipcMain.on('login:done', function(e){
     loginWindow.close();
-    mainWindow.webContents.send('login:user', user); 
-    currentUser = user.username;
+    createMainWindow();
 });
 
 // catch register
@@ -154,10 +159,9 @@ ipcMain.on('register:user', function(e){
 // catch request chat
 ipcMain.on('request:other', function(e, other){
     requestWindow.close();
-    createPopUpWindow(currentUser);
+    //createPopUpWindow(currentUser);
 
-    // createChatWindow();
-    // chatWindow.webContents.send('request:other', other);
+    mainWindow.webContents.send('request:other', other);
 });
 
 // Create menu template

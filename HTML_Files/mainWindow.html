@@ -24,141 +24,63 @@
         const jwt = require('jsonwebtoken');
 
         const h1 = document.getElementById("user");
+        h1.innerHTML = "Current User: " + window.localStorage.getItem('user');
         let login = false;
 
+
+        const ws = new Socket('https://end2endchat.me/',{
+            headers:{
+                Authorization: window.localStorage.getItem('token')
+            }
+        });
+
+        let decoded = jwt.decode(window.localStorage.getItem('token'), {complete:true});
+        let initData = JSON.stringify({
+            type:"initializeUser",
+            user: decoded.payload.username
+        });
+
+        let messageData =  JSON.stringify({
+            type: "message"
+        });
+
+        ws.on('open', function open() {
+            console.log('connected');
+            ws.send(initData);
+        });
+
+        ws.on('close', function close() {
+            console.log('diconnected');
+        })
+
+        ws.on('message', function incoming(data) {
+            console.log('message received');
+            console.log(data);
+        });
+    
+        ws.on('error', function(err){
+            console.log('Unauthorized token');
+        });
+
+
+
         // Login user
-        ipcRenderer.on('login:user', function(e, user){
-            const {username, password} = user;     
-
-            // Options for POST login1
-            const options1 = {
-                host: 'end2endchat.me',
-                port: 3000,
-                path: '/login1',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            };
-
-            // Options for POST login2
-            const options2 = {
-                host: 'end2endchat.me',
-                port: 3000,
-                path: '/login2',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            }
-
-            // Body for POST login1
-            const body1 = querystring.stringify({
-                name: username
-            });
-
-
-            let req1 = https.request(options1, function(res){
-                let responseString = "";
-                res.on('data', function(chunk){
-                    let {message, salt, challenge, error1} = JSON.parse(chunk);
-
-                    if(message == "Worked"){
-
-                        // Hash the password with the salt given
-                        let hashedPassword = crypto.pbkdf2Sync(password, salt, 100000, 256, 'sha512');
-
-                        // Body for POST login2
-                        let body2 = querystring.stringify({
-                            name:username,
-                            hashedPW:hashedPassword.toString('hex')
-                        });
-                        
-                        // Send POST login2 request to the server
-                        let req2 = https.request(options2, function(res){
-
-                            res.on('data', function(chunk1){
-                                // Getting auth token
-                                let {message, error2, token} = JSON.parse(chunk1);
-                                console.log(token);
-
-                                // Returning the token top the main file
-                                if(message == "Worked"){
-                                    window.localStorage.setItem('token', token);
-                                    console.log(window.localStorage['token']);
-                                    h1.innerHTML = "Current User: " + username;
-                                    login = true;
-
-                                    const ws = new Socket('https://end2endchat.me/',{
-                    headers:{
-                        Authorization: window.localStorage.getItem('token')
-                    }
-                });
-
-                let decoded = jwt.decode(window.localStorage.getItem('token'), {complete:true});
-                let initData = JSON.stringify({
-                    type:"initializeUser",
-                    user: decoded.payload.username
-                });
-
-                let messageData =  JSON.stringify({
-                    type: "message"
-                });
-
-                ws.on('open', function open() {
-                    console.log('connected');
-                    ws.send(initData);
-                });
-
-                ws.on('close', function close() {
-                    console.log('diconnected');
-                })
-
-                ws.on('message', function incoming(data) {
-                    console.log('message received');
-                    console.log(data);
-                });
+        ipcRenderer.on('login:user', function(e, user, creating){
             
-                ws.on('error', function(err){
-                    console.log('Unauthorized token');
-                });
-
-                
-                                } else{
-                                    h1.innerHTML = error2;
-                                }
-                                
-                            });
-                            res.on("end", function(){
-                                console.log('Done: login2');
-                            })
-                        });
-
-                        req2.write(body2);
-                        req2.end();
-                    }
-                    else{
-                        h1.innerHTML = error1;
-                    }
-                });
-                res.on("end", function(){
-                    console.log("Done: login1");
-                });
-            });
-
-            
-
-            req1.write(body1);
-            req1.end();
-
-            console.log(login);
-            if(login){
-                
-            }
             
         });
 
+        
+
         //Send request to other user
+        ipcRenderer.on('request:other', function(e, other){
+            let socketMessage = JSON.stringify({
+                type:"initializeChat",
+                receiver:other.sender
+            });
+
+            ws.send(socketMessage)
+        });
     </script>
 </body>
 </html>

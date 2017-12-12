@@ -24,11 +24,23 @@
             <input type="password" id="password">
         </div>
         <button type="submit">Login</button>
+        <div>
+            <font color="red">
+                <p  id = "error"></p>
+            </font>
+        </div>
     </form>
 
     <script>
         const electron = require('electron');
         const {ipcRenderer} = electron;
+        const https = require('https');
+        const querystring = require('querystring');
+        const crypto = require('crypto');
+        const Socket = require('ws');
+        const jwt = require('jsonwebtoken');
+
+        const p = document.getElementById("error");
 
         const form = document.querySelector('form');
         form.addEventListener('submit', submitForm);
@@ -46,8 +58,94 @@
             e.preventDefault();
             const username = document.querySelector('#username').value;
             const password = document.querySelector('#password').value;
-            const user = {'username':username, 'password':password};
-            ipcRenderer.send('login:user', user);
+            //const user = {'username':username, 'password':password};
+            //ipcRenderer.send('login:user', user);    
+
+            // Options for POST login1
+            const options1 = {
+                host: 'end2endchat.me',
+                port: 3000,
+                path: '/login1',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            };
+
+            // Options for POST login2
+            const options2 = {
+                host: 'end2endchat.me',
+                port: 3000,
+                path: '/login2',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }
+
+            // Body for POST login1
+            const body1 = querystring.stringify({
+                name: username
+            });
+
+
+            let req1 = https.request(options1, function(res){
+                res.on('data', function(chunk){
+                    let {message, salt, challenge, error1} = JSON.parse(chunk);
+
+                    if(message == "Worked"){
+
+                        // Hash the password with the salt given
+                        let hashedPassword = crypto.pbkdf2Sync(password, salt, 100000, 256, 'sha512');
+
+                        // Body for POST login2
+                        let body2 = querystring.stringify({
+                            name:username,
+                            hashedPW:hashedPassword.toString('hex')
+                        });
+                        
+                        // Send POST login2 request to the server
+                        let req2 = https.request(options2, function(res){
+
+                            
+                            res.on('data', function(chunk1){
+                                // Getting auth token
+                                let {message, error2, token} = JSON.parse(chunk1);
+                                console.log(token);
+
+                                // Returning the token top the main file
+                                if(message == "Worked"){
+                                    window.localStorage.setItem('token', token);
+                                    console.log(window.localStorage['token']);
+                                    window.localStorage.setItem('user', username);
+                                    ipcRenderer.send('login:done');  
+                                } else{
+                                    p.innerHTML = error2;
+                                }
+                                
+                            });
+                            res.on("end", function(){
+                                console.log('Done: login2');
+                            })
+                        });
+
+                        req2.write(body2);
+                        req2.end();
+                    }
+                    else{
+                        p.innerHTML = error1;
+                    }
+                });
+                res.on("end", function(){
+                    console.log("Done: login1");
+                });
+            });
+
+            
+            
+            req1.write(body1);
+            req1.end();
+
         }
     </script>
 </body>
