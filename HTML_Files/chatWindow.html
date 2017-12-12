@@ -105,24 +105,34 @@ $(document).ready(function(){
             })
 
             ws.on('message', function incoming(data) {
-                console.log('message received');
+
                 console.log(data);
+                let object = JSON.parse(data);
+
+                userChat.innerHTML += "<p>" + currentWindow.other + ": " + data.message + "</p>"
             });
         
             ws.on('error', function(err){
                 console.log('Unauthorized token');
             });
     
-            // const form = document.querySelector('form');
-            // form.addEventListener('submit', submitForm);
+            const form = document.querySelector('form');
+            form.addEventListener('submit', submitForm);
 
-            // let userChat = document.getElementById('chatbox');
+            let userChat = document.getElementById('chatbox');
     
-            // function submitForm(e){
-            //     e.preventDefault();
-            //     const msg = document.querySelector('#usermsg').value;
-            //     userChat.innerHTML += "<p>"+msg+ "</p>"
-            // }
+            function submitForm(e){
+                e.preventDefault();
+                const msg = document.querySelector('#usermsg').value;
+                userChat.innerHTML += "<p>" + decoded.payload.username + ": " + msg + "</p>"
+
+                let mssg = JSON.stringify({
+                    type: "messsage",
+                    message: msg
+                });
+
+                ws.send(mssg);
+            }
     </script>
 </body>
 </html>
